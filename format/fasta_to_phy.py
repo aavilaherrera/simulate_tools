@@ -39,6 +39,6 @@ def WritePhy(fh, ali):
 
 if __name__ == "__main__":
 	if(len(sys.argv) > 1):
-		print >>sys.stderr, "usage: %s < fasta > phy"
+		print >>sys.stderr, "usage: %s < fasta > phy" % sys.argv[0]
 		sys.exit(1)
 	WritePhy(sys.stdout, ReadFasta(sys.stdin))
