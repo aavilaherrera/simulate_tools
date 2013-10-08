@@ -1,13 +1,17 @@
 #!/usr/bin/python
-''' fasta to psicov: removes seqid
+''' fasta_to_psicov.py -- Converts fasta to PSICOV
+
+Strips ID line
+PSICOV: one sequence per line, no whitespace
+Pipe friendly
 
 '''
 
 import sys
 import re
 
-def rdfa(fh):
-	ali = list()
+def ReadFasta(fh):
+	ali = list() # list of tuples
 	header = ''
 	seq = ''
 
@@ -17,17 +21,20 @@ def rdfa(fh):
 			continue
 		if line.startswith('>'):
 			if header != '':
-				ali += [ seq ]
+				ali += [(header, re.sub("\s+","",seq))]
 				seq = ''
-			header = line[1:].split(' ', 1)[0]
+			header = line[1:].split()[0] # split id line on whitespace
 			continue
-		seq += re.sub('\s+', '', line)
-	ali += [ seq ]
+		seq += line
+	ali += [(header, re.sub("\s+","",seq))] # remove whitespace from seqs
 	return ali
 
-def prntpsicov(fh, ali):
-	for s in ali:
+def PrintPSICOV(fh, ali):
+	for h,s in ali:
 		print >>fh, s
 
 if __name__ == "__main__":
-	prntpsicov(sys.stdout, rdfa(sys.stdin))
+	if(len(sys.argv) > 1):
+		print >>sys.stderr, "usage: %s < fasta > psicov" % sys.argv[0]
+		sys.exit(1)
+	PrintPSICOV(sys.stdout, ReadFasta(sys.stdin))
