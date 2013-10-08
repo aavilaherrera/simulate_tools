@@ -8,5 +8,3 @@ if [ $# -ne 0 ]; then
 fi
 
 tail -n+2 /dev/stdin
-
-
