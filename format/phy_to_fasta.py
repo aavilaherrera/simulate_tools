@@ -1,22 +1,30 @@
 #!/usr/bin/python
-''' phy_to_fasta.py -- no name mangling
+''' PhyToFasta.py -- Converts phy to fasta
+
+No ID mangling
+No Comment
+Fasta: >ID line followed by sequence line
+Pipe friendly
 
 '''
 
 import sys
 
-def phy_to_fasta(fh):
-	cnt = 0
+def PhyToFasta(fh):
+	line_counter = 0
 	for line in fh:
-		if cnt == 0:
-			cnt += 1
+		if line_counter == 0:
+			line_counter += 1
 			continue
 		line = line.rstrip('\n\r')
 		if line == '':
 			continue
-		print '>' + line[:10]
+		print '>' + line[:10].strip() # remove whitespace
 		print line[10:]
 
 if __name__ == '__main__':
-	phy_to_fasta(sys.stdin)
+	if(len(sys.argv) > 1):
+		print >>sys.stderr, "usage: %s < phy > fasta" % sys.argv[0]
+		sys.exit(1)
+	PhyToFasta(sys.stdin)
 
