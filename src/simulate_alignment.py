@@ -13,7 +13,11 @@ __email__ = 'Aram.Avila-Herrera@ucsf.edu'
 
 import sys
 import getopt
-from os.path import exists
+from os.path import basename, exists
+from os import getenv
+
+
+src_dir = getenv('__SRC_PATH')
 
 def get_cmd_options(args):
 	''' Parse command line for options and return a dict.
@@ -65,6 +69,12 @@ def get_cmd_options(args):
 	
 def main(options):
 	print 'in main()'
+	infRoot = src_dir + '/simulate/infer_root.sh'
+	if exists(infRoot):
+		print 'will run: ' +  infRoot
+	else:
+		print infRoot + ' missing'
+
 
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
