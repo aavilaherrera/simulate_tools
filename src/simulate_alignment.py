@@ -69,11 +69,26 @@ def get_cmd_options(args):
 	
 def main(options):
 	print 'in main()'
+
 	infRoot = src_dir + '/simulate/infer_root.sh'
 	if exists(infRoot):
 		print 'will run: ' +  infRoot
 	else:
 		print infRoot + ' missing'
+	
+	m1samp = src_dir + '/simulate/m1_sample.py'
+	if exists(m1samp):
+		print 'will run: ' + m1samp
+	else:
+		print m1samp + ' missing'
+	
+	print 'todo: hmmer'
+	print 'gap_to_hmmnull'
+	print 'revolver xml... etc...'
+
+	print 'recover job'
+
+
 
 
 if __name__ == '__main__':
