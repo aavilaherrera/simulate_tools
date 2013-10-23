@@ -1,9 +1,15 @@
 #!/bin/bash
-# infer ancestral root using ancestral (ANCESCON)
+# infer_root.sh -- infer ancestral root using ancestral (ANCESCON)
 
-if [ $# -ne 2 ]; then
-	echo "Usage: $0 ancphy anctre > gapped_root.fa"
+if [ $# != 2 ]; then
+	echo "Usage: $0 ancphy anctre > gapped_root.fa" > /dev/stderr
 	exit 1
+fi
+
+if [ "$(which ancestral)" == "" ]; then
+	echo "Error: ancestral not installed" > /dev/stderr
+	echo "Please symlink or install ancestral to your path" > /dev/stderr
+	exit 2
 fi
 
 echo '>root'
