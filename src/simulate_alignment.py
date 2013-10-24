@@ -14,7 +14,7 @@ __email__ = 'Aram.Avila-Herrera@ucsf.edu'
 import sys
 import getopt
 from os.path import exists
-from os import getenv, mkdir, system
+from os import getenv, mkdir, makedirs, system
 
 src_dir = getenv('__SRC_PATH')
 
@@ -162,14 +162,17 @@ def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db):
 	
 	rtSqNG_fn = tmpdir+'/rtSqNoGaps.fa'
 	rtAno_fn = tmpdir+'/rootSeq.scan'
-	revdir = outdir+'/revolver-%s/'+job_name
+	revdir = outdir+'/revolver-%s'%(job_name)
+
+	if not exists(revdir):
+		makedirs(revdir)
 
 	if hmmer_db == '':
 		hmmer_db = '%s/%s.hmm' % (outdir, job_name)
 
-	system('python %s/simulate/mk_revolver_xml.py %s treefile=%s ' +
-			'rtseqfile=%s rtanofile=%s hmmfile=%s workdir=%s > %s' %
-			(job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, revdir)
+	system(('python %s/simulate/mk_revolver_xml.py %s treefile=%s ' +
+			'rtseqfile=%s rtanofile=%s hmmfile=%s workdir=%s > %s') %
+			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, revdir, revdir+'/'+job_name+'.xml'))
 	return revdir
 
 def main(options):
@@ -193,7 +196,7 @@ def main(options):
 
 	if not options['skip_revxml']:
 		generate_revolver_xml(options['job_name'], options['outdir'], tmpdir,
-									options['tree'])
+									options['tree'], options['hmmer_db'])
 	
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
