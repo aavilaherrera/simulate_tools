@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 ''' read og for gap pattern -- specify type
 	read sim -- same type
 	lookup pattern for each sim seq
