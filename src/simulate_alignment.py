@@ -59,7 +59,7 @@ def get_cmd_options(args):
 		if opt in ('--skip_hmmer'):
 			options['skip_hmmer'] = True
 
-	if len(args) =! 2:
+	if len(args) != 2:
 		print >>sys.stderr, 'Error: wrong number of args'
 		sys.exit(usage)
 	if not exists(args[1]):
