@@ -13,7 +13,7 @@ __email__ = 'Aram.Avila-Herrera@ucsf.edu'
 
 import sys
 import getopt
-from os.path import basename, exists
+from os.path import exists
 from os import getenv, mkdir, system
 
 src_dir = getenv('__SRC_PATH')
@@ -30,13 +30,14 @@ def get_cmd_options(args):
 				'				[ --hmmer_db pfam.hmm ]\n'+\
 				'				[ --skip_anc ]\n'+\
 				'				[ --skip_hmmer ]\n'+\
+				'				[ --skip_revxml ]\n'+\
 				'				[ --outdir outdir ] job_name input_aln.phy'
 			) % sys.argv[0]
 	
 	try:
 		optlist, args = getopt.getopt(args, 'ht:d:o:',
 							['help', 'tree=', 'hmmer_db=',
-							'skip_anc', 'skip_hmmer',
+							'skip_anc', 'skip_hmmer', 'skip_revxml',
 							'outdir='])
 	except getopt.GetoptError as err:
 		print >>sys.stderr, 'Error: %s' % err
@@ -47,6 +48,7 @@ def get_cmd_options(args):
 	# set defaults
 	options['skip_anc'] = False
 	options['skip_hmmer'] = False
+	options['skip_revxml']= False
 	options['outdir'] = '.'
 	options['hmmer_db'] = ''
 
@@ -65,6 +67,8 @@ def get_cmd_options(args):
 			options['skip_anc'] = True
 		if opt in ('--skip_hmmer'):
 			options['skip_hmmer'] = True
+		if opt in ('--skip_revxml'):
+			options['skip_revxml'] = True
 
 	if len(args) != 2:
 		print >>sys.stderr, 'Error: wrong number of args'
@@ -151,6 +155,23 @@ def annotate_root(job_name, outdir, tmpdir, aln_fn, hmmer_db):
 
 	return rtSqNG_fn
 
+def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db):
+	''' generates revolver xml in outdir/rev-job_name/job_name.xml
+
+	'''
+	
+	rtSqNG_fn = tmpdir+'/rtSqNoGaps.fa'
+	rtAno_fn = tmpdir+'/rootSeq.scan'
+	revdir = outdir+'/revolver-%s/'+job_name
+
+	if hmmer_db == '':
+		hmmer_db = '%s/%s.hmm' % (outdir, job_name)
+
+	system('python %s/simulate/mk_revolver_xml.py %s treefile=%s ' +
+			'rtseqfile=%s rtanofile=%s hmmfile=%s workdir=%s > %s' %
+			(job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, revdir)
+	return revdir
+
 def main(options):
 	''' makes tmpdir, infers root, degaps, runs revolver, regaps
 
@@ -169,8 +190,10 @@ def main(options):
 	if not options['skip_hmmer']:
 		annotate_root(options['job_name'], options['outdir'], tmpdir, 
 						options['aln_fn'], options['hmmer_db'])
-	
 
+	if not options['skip_revxml']:
+		generate_revolver_xml(options['job_name'], options['outdir'], tmpdir,
+									options['tree'])
 	
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
