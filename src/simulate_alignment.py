@@ -15,7 +15,7 @@ import sys
 import getopt
 from os.path import basename, exists
 from os import getenv
-
+from subprocess import *
 
 src_dir = getenv('__SRC_PATH')
 
@@ -85,7 +85,7 @@ def PhyCheckNumSeqs(phy_fn):
 	numSeqs = phy_fh.readlines()[0].strip().split()[0] # get num seqs from header
 	return int(numSeqs)
 
-def infer_the_root(job_name, aln_fn, tre_fn, rootSeq_fn):
+def infer_the_root(job_name, tmpdir, aln_fn, tre_fn, rootSeq_fn):
 	''' infer root sequence and write as fasta to rootSeq_fn
 
 		check number of sequences in aln_fn and run ANCESCON
@@ -95,23 +95,23 @@ def infer_the_root(job_name, aln_fn, tre_fn, rootSeq_fn):
 	
 	'''
 
-	#numSeqs = PhyCheckNumSeqs(aln_fn)
-	numSeqs = 100000000
+	numSeqs = PhyCheckNumSeqs(aln_fn)
+	#numSeqs = 1000
 	
 	if numSeqs > 1052:
 		sys.exit("alignment \'%s\' too big for Revolver" % aln_fn)
 	if numSeqs > 250:
 		print 'alignment too big for ancescon'
 		print 'sampling from 1st order markov chain'
-		rootSeq = check_output([python, src_dir+'/simulate/m1_sample.py', aln_fn])
+		rootSeq = Popen(['python', src_dir+'/simulate/m1_sample.py', aln_fn], stdout=PIPE).communicate()[0]
 
 	else:
 		# first format phy for ANCESCON
 		ancphy = tmpdir + '/%s.ancphy' % job_name
 		anctre = tmpdir + '/%s.anctre' % job_name
 		
-		fmt_seq = check_output([bash, src_dir+'/format/phy_to_ancphy.sh'], stdin=open(aln_fn))
-		fmt_tre = check_output([bash, src_dir+'/format/tre_to_anctre.sh'], stdin=open(tre_fn))
+		fmt_seq = Popen(['bash', src_dir+'/format/phy_to_ancphy.sh'], stdin=open(aln_fn), stdout=PIPE).communicate()[0]
+		fmt_tre = Popen(['bash', src_dir+'/format/tre_to_anctre.sh'], stdin=open(tre_fn), stdout=PIPE).communicate()[0]
 
 		ancphy_fh = open(ancphy, 'w')
 		print >>ancphy_fh, fmt_seq
@@ -121,7 +121,7 @@ def infer_the_root(job_name, aln_fn, tre_fn, rootSeq_fn):
 		print >>anctre_fh, fmt_tre
 		anctre_fh.close()
 
-		rootSeq = check_output([bash, src_dir+'/simulate/infer_root.sh', ancphy, anctre])
+		rootSeq = Popen(['bash', src_dir+'/simulate/infer_root.sh', ancphy, anctre], stdout=PIPE).communicate()[0]
 	
 	rootSeq_fh = open(rootSeq_fn, 'w')
 	print >>rootSeq_fh, rootSeq
@@ -133,7 +133,7 @@ def main(options):
 	print 'in main()'
 	print 'testing infer_the_root()'
 
-	infer_the_root(options['job_name'], options['aln_fn'], options['tree'], 'derp.fa')
+	infer_the_root(options['job_name'], './', options['aln_fn'], options['tree'], 'derp.fa')
 
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
