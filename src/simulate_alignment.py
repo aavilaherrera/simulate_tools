@@ -48,6 +48,7 @@ def get_cmd_options(args):
 	options['skip_anc'] = False
 	options['skip_hmmer'] = False
 	options['outdir'] = './'
+	options['hmmer_db'] = ''
 
 
 	# read command line options
@@ -135,15 +136,30 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
 	
 	return
 
+def annotate_root(job_name, hmmer_db, tmpdir):
+	if hmmer_db == '':
+		return 'le empty'
+	else:
+		return 'le not empty'
+
 def main(options):
+	''' makes tmpdir, infers root, degaps, runs revolver, regaps
+
+	'''
+
 	print 'in main()'
 
+	# make tmpdir
 	tmpdir = options['outdir'] + '/' + 'tmp-' + options['job_name']
 	if not exists(tmpdir):
 		mkdir(tmpdir)
+	
 	if not options['skip_anc']:
 		infer_the_root(options['job_name'], tmpdir, options['aln_fn'], options['tree'])
 
+	if not options['skip_hmmer']:
+		annotate_root(options['job_name'], options['hmmer_db'], tmpdir)
+	
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
 	main(options)
