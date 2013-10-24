@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 ''' makes a first order markov chain from an alignment
 	samples from the chain
 
