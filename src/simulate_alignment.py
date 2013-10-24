@@ -29,7 +29,9 @@ def get_cmd_options(args):
 	usage = (
 				'usage: %s [-h | [ --tree tree_file ] \n'+\
 				'				[ --hmmer_db pfam.hmm ]\n'+\
-				'				[ --outdir outdir ] input_aln.phy'
+				'				[ --skip_anc ]\n'+\
+				'				[ --skip_hmmer ]\n'+\
+				'				[ --outdir outdir ] job_name input_aln.phy'
 			) % sys.argv[0]
 	
 	try:
@@ -52,44 +54,86 @@ def get_cmd_options(args):
 			options['hmmer_db'] = val
 		if opt in ('t', '--tree'):
 			options['tree'] = val
+		if opt in ('--skip_anc'):
+			options['skip_anc'] = True
+		if opt in ('--skip_hmmer'):
+			options['skip_hmmer'] = True
 
-	if len(args) > 0:
-		if exists(args[0]):
-			options['aln_fn'] = args[0]
-		else:
-			print >>sys.stderr, '%s: file %s not found' % (sys.argv[0], args[0])
-	else:
-		print >>sys.stderr, '%s: alignment file not specified' % sys.argv[0]
-	
+	if len(args) =! 2:
+		print >>sys.stderr, 'Error: wrong number of args'
+		sys.exit(usage)
+	if not exists(args[1]):
+		sys.exit('Error: %s does not exist' % args[1])
+
+	options['job_name'] = args[0]
+	options['aln_fn'] = args[1]
+
 	print 'running with options:'
 	[ sys.stdout.write('\t%s: %s\n'%(opt, val))
 				for opt, val in sorted(options.iteritems()) ]
 		
 	return options
+
+def PhyCheckNumSeqs(phy_fn):
+	''' get number of sequences from phy header
+
+		breaks if phy_fn doesn't exist or isn't a proper phylip file
+
+	'''
+
+	phy_fh = open(phy_fn, 'r')
+	numSeqs = phy_fh.readlines()[0].strip().split()[0] # get num seqs from header
+	return int(numSeqs)
+
+def infer_the_root(job_name, aln_fn, tre_fn, rootSeq_fn):
+	''' infer root sequence and write as fasta to rootSeq_fn
+
+		check number of sequences in aln_fn and run ANCESCON
+		or sample from 1st order markov chain
+
+		file formatting required for ANCESCON
 	
+	'''
+
+	#numSeqs = PhyCheckNumSeqs(aln_fn)
+	numSeqs = 100000000
+	
+	if numSeqs > 1052:
+		sys.exit("alignment \'%s\' too big for Revolver" % aln_fn)
+	if numSeqs > 250:
+		print 'alignment too big for ancescon'
+		print 'sampling from 1st order markov chain'
+		rootSeq = check_output([python, src_dir+'/simulate/m1_sample.py', aln_fn])
+
+	else:
+		# first format phy for ANCESCON
+		ancphy = tmpdir + '/%s.ancphy' % job_name
+		anctre = tmpdir + '/%s.anctre' % job_name
+		
+		fmt_seq = check_output([bash, src_dir+'/format/phy_to_ancphy.sh'], stdin=open(aln_fn))
+		fmt_tre = check_output([bash, src_dir+'/format/tre_to_anctre.sh'], stdin=open(tre_fn))
+
+		ancphy_fh = open(ancphy, 'w')
+		print >>ancphy_fh, fmt_seq
+		ancphy_fh.close()
+
+		anctre_fh = open(anctre, 'w')
+		print >>anctre_fh, fmt_tre
+		anctre_fh.close()
+
+		rootSeq = check_output([bash, src_dir+'/simulate/infer_root.sh', ancphy, anctre])
+	
+	rootSeq_fh = open(rootSeq_fn, 'w')
+	print >>rootSeq_fh, rootSeq
+	rootSeq_fh.close()
+	
+	return
+
 def main(options):
 	print 'in main()'
+	print 'testing infer_the_root()'
 
-	infRoot = src_dir + '/simulate/infer_root.sh'
-	if exists(infRoot):
-		print 'will run: ' +  infRoot
-	else:
-		print infRoot + ' missing'
-	
-	m1samp = src_dir + '/simulate/m1_sample.py'
-	if exists(m1samp):
-		print 'will run: ' + m1samp
-	else:
-		print m1samp + ' missing'
-	
-	print 'todo: hmmer'
-	print 'gap_to_hmmnull'
-	print 'revolver xml... etc...'
-
-	print 'recover job'
-
-
-
+	infer_the_root(options['job_name'], options['aln_fn'], options['tree'], 'derp.fa')
 
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
