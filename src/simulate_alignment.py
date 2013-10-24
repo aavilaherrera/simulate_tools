@@ -14,7 +14,7 @@ __email__ = 'Aram.Avila-Herrera@ucsf.edu'
 import sys
 import getopt
 from os.path import basename, exists
-from os import getenv
+from os import getenv, mkdir
 from subprocess import *
 
 src_dir = getenv('__SRC_PATH')
@@ -43,7 +43,13 @@ def get_cmd_options(args):
 		sys.exit(usage)
 	
 	options = dict()
-	
+
+	# set defaults
+	options['skip_anc'] = False
+	options['skip_hmmer'] = False
+	options['outdir'] = './'
+
+
 	# read command line options
 	for opt, val in optlist:
 		if opt in ('-h', '--help'):
@@ -134,7 +140,7 @@ def main(options):
 
 	tmpdir = options['outdir'] + '/' + 'tmp-' + options['job_name']
 	if not exists(tmpdir):
-		os.mkdir(tmpdir)
+		mkdir(tmpdir)
 	if not options['skip_anc']:
 		infer_the_root(options['job_name'], tmpdir, options['aln_fn'], options['tree'])
 
