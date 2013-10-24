@@ -85,8 +85,8 @@ def PhyCheckNumSeqs(phy_fn):
 	numSeqs = phy_fh.readlines()[0].strip().split()[0] # get num seqs from header
 	return int(numSeqs)
 
-def infer_the_root(job_name, tmpdir, aln_fn, tre_fn, rootSeq_fn):
-	''' infer root sequence and write as fasta to rootSeq_fn
+def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
+	''' infer root sequence and write as fasta to tmpdir/rootSeq.fa
 
 		check number of sequences in aln_fn and run ANCESCON
 		or sample from 1st order markov chain
@@ -123,7 +123,7 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn, rootSeq_fn):
 
 		rootSeq = Popen(['bash', src_dir+'/simulate/infer_root.sh', ancphy, anctre], stdout=PIPE).communicate()[0]
 	
-	rootSeq_fh = open(rootSeq_fn, 'w')
+	rootSeq_fh = open(tmpdir +'/rootSeq.fa', 'w')
 	print >>rootSeq_fh, rootSeq
 	rootSeq_fh.close()
 	
@@ -131,9 +131,12 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn, rootSeq_fn):
 
 def main(options):
 	print 'in main()'
-	print 'testing infer_the_root()'
 
-	infer_the_root(options['job_name'], './', options['aln_fn'], options['tree'], 'derp.fa')
+	tmpdir = options['outdir'] + '/' + 'tmp-' + options['job_name']
+	if not exists(tmpdir):
+		os.mkdir(tmpdir)
+	if not options['skip_anc']:
+		infer_the_root(options['job_name'], tmpdir, options['aln_fn'], options['tree'])
 
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
