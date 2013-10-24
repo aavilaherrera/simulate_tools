@@ -14,8 +14,7 @@ __email__ = 'Aram.Avila-Herrera@ucsf.edu'
 import sys
 import getopt
 from os.path import basename, exists
-from os import getenv, mkdir
-from subprocess import *
+from os import getenv, mkdir, system
 
 src_dir = getenv('__SRC_PATH')
 
@@ -37,6 +36,7 @@ def get_cmd_options(args):
 	try:
 		optlist, args = getopt.getopt(args, 'ht:d:o:',
 							['help', 'tree=', 'hmmer_db=',
+							'skip_anc', 'skip_hmmer',
 							'outdir='])
 	except getopt.GetoptError as err:
 		print >>sys.stderr, 'Error: %s' % err
@@ -47,7 +47,7 @@ def get_cmd_options(args):
 	# set defaults
 	options['skip_anc'] = False
 	options['skip_hmmer'] = False
-	options['outdir'] = './'
+	options['outdir'] = '.'
 	options['hmmer_db'] = ''
 
 
@@ -102,45 +102,54 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
 	
 	'''
 
+	rtSeq_fn = tmpdir+'/rootSeq.fa'
+
 	numSeqs = PhyCheckNumSeqs(aln_fn)
 	#numSeqs = 1000
-	
-	if numSeqs > 1052:
-		sys.exit("alignment \'%s\' too big for Revolver" % aln_fn)
-	if numSeqs > 250:
-		print 'alignment too big for ancescon'
-		print 'sampling from 1st order markov chain'
-		rootSeq = Popen(['python', src_dir+'/simulate/m1_sample.py', aln_fn], stdout=PIPE).communicate()[0]
 
+	if numSeqs > 1052:
+		sys.exit("Error: alignment \'%s\' too big for Revolver" % aln_fn)
+	if numSeqs > 250:
+		print 'Warning: alignment too big for ancescon'
+		print '\tsampling from 1st order markov chain'
+		system('python %s/simulate/m1_sample.py %s > %s' % (src_dir, aln_fn, rtSeq_fn))
 	else:
 		# first format phy for ANCESCON
 		ancphy = tmpdir + '/%s.ancphy' % job_name
 		anctre = tmpdir + '/%s.anctre' % job_name
-		
-		fmt_seq = Popen(['bash', src_dir+'/format/phy_to_ancphy.sh'], stdin=open(aln_fn), stdout=PIPE).communicate()[0]
-		fmt_tre = Popen(['bash', src_dir+'/format/tre_to_anctre.sh'], stdin=open(tre_fn), stdout=PIPE).communicate()[0]
-
-		ancphy_fh = open(ancphy, 'w')
-		print >>ancphy_fh, fmt_seq
-		ancphy_fh.close()
-
-		anctre_fh = open(anctre, 'w')
-		print >>anctre_fh, fmt_tre
-		anctre_fh.close()
-
-		rootSeq = Popen(['bash', src_dir+'/simulate/infer_root.sh', ancphy, anctre], stdout=PIPE).communicate()[0]
 	
-	rootSeq_fh = open(tmpdir +'/rootSeq.fa', 'w')
-	print >>rootSeq_fh, rootSeq
-	rootSeq_fh.close()
-	
-	return
+		system('bash %s/format/phy_to_ancphy.sh < %s > %s' % (src_dir, aln_fn, ancphy))
+		system('bash %s/format/tre_to_anctre.sh < %s > %s' % (src_dir, tre_fn, anctre))
+		system('bash %s/simulate/infer_root.sh %s %s > %s' % (src_dir, ancphy, anctre, rtSeq_fn))
 
-def annotate_root(job_name, hmmer_db, tmpdir):
+	return rtSeq_fn
+
+def annotate_root(job_name, outdir, tmpdir, aln_fn, hmmer_db):
+	''' annotates root sequence with profile hmm
+
+		builds hmm from alignment if necessary
+		patches gaps with multinomial sample from hmm background
+
+	'''
+
+	rtSeq_fn = tmpdir+'/rootSeq.fa'
+	rtAno_fn = tmpdir+'/rootSeq.scan'
+	rtSqNG_fn = tmpdir+'/rtSqNoGaps.fa'
+
+	hmm_fn = '%s/%s.hmm' % (outdir, job_name)
 	if hmmer_db == '':
-		return 'le empty'
-	else:
-		return 'le not empty'
+		# build hmm from aln
+		hmmer_db = '%s/%s.hmm' % (outdir, job_name)
+		system('%s/format/phytosto.pl < %s | hmmbuild -n %s %s /dev/stdin' %
+								(src_dir, aln_fn, job_name, hmm_fn))
+		system('hmmpress -f %s' % hmm_fn)
+	# annotate
+	system('hmmscan --notextw %s %s > %s' % (hmm_fn, rtSeq_fn, rtAno_fn))
+	# patch gaps
+	system('python %s/simulate/gap_to_hmmnull.py %s %s > %s' %
+								(src_dir, rtSeq_fn, hmmer_db, rtSqNG_fn))
+
+	return rtSqNG_fn
 
 def main(options):
 	''' makes tmpdir, infers root, degaps, runs revolver, regaps
@@ -158,7 +167,10 @@ def main(options):
 		infer_the_root(options['job_name'], tmpdir, options['aln_fn'], options['tree'])
 
 	if not options['skip_hmmer']:
-		annotate_root(options['job_name'], options['hmmer_db'], tmpdir)
+		annotate_root(options['job_name'], options['outdir'], tmpdir, 
+						options['aln_fn'], options['hmmer_db'])
+	
+
 	
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
