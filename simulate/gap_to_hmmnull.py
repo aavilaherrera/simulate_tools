@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 ''' gap_to_hmmnull.py -- fills gaps in a sequence with amino acids sampled
 						from hmmer null distribution
 
