@@ -58,17 +58,19 @@ def parse_options(args, jobname):
 				#"rtseqfile" : jobname+'.root',
 				#"rtanofile" : jobname+'.scan'
 	}
-	arg_opts = dict([ arg.split('=')[:2] for arg in args if '=' in arg])
-	for opt_k in options.iterkeys():
-		if opt_k in arg_opts:
-			options[opt_k] = str(arg_opts[opt_k])
 	options['rtseqfile'] = '%s/tmp-%s/rtSqNoGap.fa' % (options['workdir'], jobname)
 	options['rtanofile'] = '%s/tmp-%s/rootSeq.scan' % (options['workdir'], jobname)
 	options['hmmfile'] = '%s/%s.hmm' % (options['workdir'], jobname)
 	options['outdir'] = '%s/revolver-%s' % (options['workdir'], jobname)
-	options['hmmfetch'] = popen('which hmmfetch').read()
+	options['hmmfetch'] = popen('which hmmfetch').read().strip()
+	options['treefile'] = ''
 
-	if 'treefile' not in options:
+	arg_opts = dict([ arg.split('=')[:2] for arg in args if '=' in arg])
+	for opt_k in options.iterkeys():
+		if opt_k in arg_opts:
+			options[opt_k] = str(arg_opts[opt_k])
+
+	if options['treefile'] == '':
 		sys.exit('Error: treefile not specified')
 	if options['hmmfetch'] == '':
 		sys.exit('Error: hmmfetch not installed')
@@ -98,7 +100,7 @@ if __name__ == "__main__":
 	if not exists(options['outdir']):
 		mkdir(options['outdir'])
 
-	xml_string = gen_str(jobname, options)
+	xml_string = gen_str(options)
 	print xml_string
 	
 
