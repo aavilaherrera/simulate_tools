@@ -1,45 +1,40 @@
 #!/bin/bash
 # simulate all proteins in processed_alignments
 
-ALI_DIR="./processed_alignments"
+usage(){
+	echo "usage: $0 revolver_input.xml num_sims T|F" >> /dev/stderr
+	echo "             mask with original gaps?--^" >> /dev/stderr
+	exit 1
+}
 
-PARALLEL='yes'
-
-#echo ${ALI_DIR}
-#echo ${TRE_DIR}
-#echo ${PARALLEL}
-
-SCRIPTS="/home/aram/projects/coevo_bin"
-
-if [ $# -gt 0 ]; then
-	ALILIST=${@}
-else
-	ALILIST=$(ls ${ALI_DIR}/*.phy)
+if [ "$#" != 3 ]; then
+	usage()
 fi
 
-# parallel version:
-if [ "${PARALLEL}" == 'yes' ];
-then
-	ARGLIST=""
-	for ALI in ${ALILIST};
-	do
-		JOB=$(basename ${ALI%.phy})
-		ARGLIST="${ARGLIST} ${JOB} ./ 1000"
-	done
-	
-	#echo ${ARGLIST}
-	parallel -j 5 -l 13 -n 3 ${SCRIPTS}/do_revolver.sh -- ${ARGLIST}
-	exit
+if [ -z "${REVOLVER}" ]; then
+	echo "export REVOLVER=\"/path/to/revolver_executable\""
+	exit 2
 fi
 
+if [ -z "${__SRC_PATH}" ]; then
+	echo "export __SRC_PATH=\"/path/to/simulate_tools\""
+	exit 3
+fi
 
-# serial version:
-echo "serial version broken"
-for ALI in $(ls ${ALI_DIR}/*.phy);
-do
-	echo sim ${ALI}
-	JOB=$(basename ${ALI%.phy})
-	${SCRIPTS}/do_revolver.sh ${ALI} ./ 1000
+RXML="${1}"
+NSIMS="${2}"
+GAPS="${3}"
+REVDIR="$(dirname ${RXML})"
+
+
+for REP in {1..${NSIMS}}; do
+	${REVOLVER} ${RXML}
+	if [ "${GAPS}" == F ]; then
+		mv ${REVDIR}/out.fa ${REVDIR}/sim${REP}.fa
+	else
+		python ${__SRC_PATH}/simulate/apply_gaps.py phy2fa < ${REVDIR}/out.fa\
+													> ${REVDIR}/sim${REP}.fa
+	fi
 done
 
-
+	
