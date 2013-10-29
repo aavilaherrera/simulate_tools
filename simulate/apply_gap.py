@@ -115,6 +115,9 @@ if __name__ == "__main__":
 	elif fmt == 'vi':
 		gap_pattern = mk_mask(rdphy(aln_fh))
 		fxphy(sys.stdin, gap_pattern)
+	elif fmt == 'phy2fa':
+		gap_pattern = mk_mask(rdphy(aln_fh))
+		fxfa(sys.stdin, gap_pattern)
 	else:
 		gap_pattern = mk_mask(rdfa(aln_fh))
 		fxfa(sys.stdin, gap_pattern)
