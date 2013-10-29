@@ -13,7 +13,7 @@ __email__ = 'Aram.Avila-Herrera@ucsf.edu'
 
 import sys
 import getopt
-from os.path import exists
+from os.path import exists, basename
 from os import getenv, mkdir, makedirs, system
 
 src_dir = getenv('__SRC_PATH')
@@ -121,7 +121,8 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
 		# first format phy for ANCESCON
 		ancphy = tmpdir + '/%s.ancphy' % job_name
 		anctre = tmpdir + '/%s.anctre' % job_name
-	
+		
+		print "%s: inferring root sequence" % basename(sys.argv[0])
 		system('bash %s/format/phy_to_ancphy.sh < %s > %s' % (src_dir, aln_fn, ancphy))
 		system('bash %s/format/tre_to_anctre.sh < %s > %s' % (src_dir, tre_fn, anctre))
 		system('bash %s/simulate/infer_root.sh %s %s > %s' % (src_dir, ancphy, anctre, rtSeq_fn))
@@ -131,8 +132,8 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
 def annotate_root(job_name, outdir, tmpdir, aln_fn, hmmer_db):
 	''' annotates root sequence with profile hmm
 
-		builds hmm from alignment if necessary
-		patches gaps with multinomial sample from hmm background
+		builds hmm from alignment if hmmer_db is empty.
+		patches gaps with multinomial sample from hmm background.
 
 	'''
 
@@ -140,15 +141,16 @@ def annotate_root(job_name, outdir, tmpdir, aln_fn, hmmer_db):
 	rtAno_fn = tmpdir+'/rootSeq.scan'
 	rtSqNG_fn = tmpdir+'/rtSqNoGaps.fa'
 
-	hmm_fn = '%s/%s.hmm' % (outdir, job_name)
 	if hmmer_db == '':
 		# build hmm from aln
+		print "%s: building hmm from alignment" % basename(sys.argv[0])
 		hmmer_db = '%s/%s.hmm' % (outdir, job_name)
 		system('%s/format/phytosto.pl < %s | hmmbuild -n %s %s /dev/stdin' %
-								(src_dir, aln_fn, job_name, hmm_fn))
-		system('hmmpress -f %s' % hmm_fn)
+								(src_dir, aln_fn, job_name, hmmer_db))
+	system('hmmpress -f %s' % hmmer_db)
 	# annotate
-	system('hmmscan --notextw %s %s > %s' % (hmm_fn, rtSeq_fn, rtAno_fn))
+	print "%s: annotating root sequence and patching gaps" % basename(sys.argv[0])
+	system('hmmscan --notextw %s %s > %s' % (hmmer_db, rtSeq_fn, rtAno_fn))
 	# patch gaps
 	system('python %s/simulate/gap_to_hmmnull.py %s %s > %s' %
 								(src_dir, rtSeq_fn, hmmer_db, rtSqNG_fn))
@@ -165,11 +167,14 @@ def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db):
 	revdir = outdir+'/revolver-%s'%(job_name)
 
 	if not exists(revdir):
+		print "%s: making %s" % (basename(sys.argv[0]), revdir)
 		makedirs(revdir)
 
+	#this global option should have defaults
 	if hmmer_db == '':
 		hmmer_db = '%s/%s.hmm' % (outdir, job_name)
 
+	print "%s: making revolver xml input file" % basename(sys.argv[0])
 	system(('python %s/simulate/mk_revolver_xml.py %s treefile=%s ' +
 			'rtseqfile=%s rtanofile=%s hmmfile=%s workdir=%s > %s') %
 			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, revdir, revdir+'/'+job_name+'.xml'))
@@ -180,16 +185,17 @@ def main(options):
 
 	'''
 
-	print 'in main()'
-
 	# make tmpdir
 	tmpdir = options['outdir'] + '/' + 'tmp-' + options['job_name']
 	if not exists(tmpdir):
+		print "%s: Making %s" % (basename(sys.argv[0]), tmpdir)
 		mkdir(tmpdir)
 	
+	# infer root
 	if not options['skip_anc']:
 		infer_the_root(options['job_name'], tmpdir, options['aln_fn'], options['tree'])
 
+	# hmmer
 	if not options['skip_hmmer']:
 		annotate_root(options['job_name'], options['outdir'], tmpdir, 
 						options['aln_fn'], options['hmmer_db'])
@@ -198,6 +204,9 @@ def main(options):
 		generate_revolver_xml(options['job_name'], options['outdir'], tmpdir,
 									options['tree'], options['hmmer_db'])
 	
+	# now execute parallel simulations
+
+
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
 	main(options)
