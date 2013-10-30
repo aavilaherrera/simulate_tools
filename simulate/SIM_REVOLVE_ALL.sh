@@ -11,8 +11,8 @@ if [ "$#" != 3 ]; then
 	usage
 fi
 
-if [ -z "${REVOLVER}" ]; then
-	echo "export REVOLVER=\"/path/to/revolver_executable\""
+if [ -z "${__REVOLVER}" ]; then
+	echo "export __REVOLVER=\"/path/to/revolver_executable\""
 	exit 2
 fi
 
@@ -28,11 +28,11 @@ REVDIR="$(dirname ${RXML})"
 
 
 for REP in {1..${NSIMS}}; do
-	${REVOLVER} ${RXML}
+	${__REVOLVER} ${RXML}
 	if [ "${GAPS}" == "F" ]; then
 		mv ${REVDIR}/out.fa ${REVDIR}/sim${REP}.fa
 	else
-		python ${__SRC_PATH}/simulate/apply_gaps.py phy2fa < ${REVDIR}/out.fa\
+		python ${__SRC_PATH}/simulate/apply_gap.py phy2fa < ${REVDIR}/out.fa\
 													> ${REVDIR}/sim${REP}.fa
 	fi
 done
