@@ -2,12 +2,12 @@
 # simulate all proteins in processed_alignments
 
 usage(){
-	echo "usage: $0 revolver_input.xml num_sims T|F" >> /dev/stderr
+	echo "usage: $0 revolver_input.xml orig_aln num_sims T|F" >> /dev/stderr
 	echo "             mask with original gaps?--^" >> /dev/stderr
 	exit 1
 }
 
-if [ "$#" != 3 ]; then
+if [ "$#" != 4 ]; then
 	usage
 fi
 
@@ -22,8 +22,9 @@ if [ -z "${__SRC_PATH}" ]; then
 fi
 
 RXML="${1}"
-NSIMS="${2}"
-GAPS="${3}"
+OGALN="${2}"
+NSIMS="${3}"
+GAPS="${4}"
 REVDIR="$(dirname ${RXML})"
 
 
@@ -32,7 +33,7 @@ for REP in {1..${NSIMS}}; do
 	if [ "${GAPS}" == "F" ]; then
 		mv ${REVDIR}/out.fa ${REVDIR}/sim${REP}.fa
 	else
-		python ${__SRC_PATH}/simulate/apply_gap.py phy2fa < ${REVDIR}/out.fa\
+		python ${__SRC_PATH}/simulate/apply_gap.py phy2fa ${OGALN} < ${REVDIR}/out.fa\
 													> ${REVDIR}/sim${REP}.fa
 	fi
 done
