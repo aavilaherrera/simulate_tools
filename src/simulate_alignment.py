@@ -180,7 +180,7 @@ def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db):
 	print "%s: making revolver xml input file" % basename(sys.argv[0])
 	system(('python %s/simulate/mk_revolver_xml.py %s treefile=%s ' +
 			'rtseqfile=%s rtanofile=%s hmmfile=%s workdir=%s > %s') %
-			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, revdir, revdir+'/'+job_name+'.xml'))
+			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, outdir, revdir+'/'+job_name+'.xml'))
 	return revdir
 
 def run_revolver(job_name, outdir, aln_fn, num_sims):
