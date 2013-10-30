@@ -14,7 +14,7 @@ ALN="${TESTDIR}/A3G.phy"
 TRE="${TESTDIR}/A3G.tre"
 OUTDIR="${TESTDIR}"
 
-python ${__SRC_PATH}/src/simulate_alignment.py --num_sims 2 --outdir ${OUTDIR} --tree ${TRE} ${@} test_job ${ALN}
+python ${__SRC_PATH}/src/simulate_alignment.py --num_sims 5 --outdir ${OUTDIR} --tree ${TRE} ${@} test_job ${ALN}
 
 
 
