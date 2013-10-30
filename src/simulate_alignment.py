@@ -188,9 +188,10 @@ def run_revolver(job_name, outdir, num_sims):
 	revxml = revdir+'/%s.xml' % job_name
 	
 	print "%s: revolving now..." % basename(sys.argv[0]) 
-	system('bash %s/simulate/SIM_REVOLVE_ALL.sh %s %d AddBackOrigGaps' % (src_dir, revxml, num_sims))
-	print "%s: results in %s" % (basename(sys.argv[0]), revdir)
-
+	exit_status = system('bash %s/simulate/SIM_REVOLVE_ALL.sh %s %d AddBackOrigGaps' % (src_dir, revxml, num_sims))
+	if exit_status == 0:
+		print "%s: results in %s" % (basename(sys.argv[0]), revdir)
+	
 def main(options):
 	''' makes tmpdir, infers root, degaps, runs revolver, regaps
 
