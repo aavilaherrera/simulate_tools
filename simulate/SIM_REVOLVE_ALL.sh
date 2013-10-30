@@ -28,7 +28,7 @@ GAPS="${4}"
 REVDIR="$(dirname ${RXML})"
 
 
-for REP in {1..${NSIMS}}; do
+for (( REP = 1; REP <= ${NSIMS}; REP++)); do
 	${__REVOLVER} ${RXML}
 	if [ "${GAPS}" == "F" ]; then
 		mv ${REVDIR}/out.fa ${REVDIR}/sim${REP}.fa
