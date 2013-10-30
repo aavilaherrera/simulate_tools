@@ -128,7 +128,18 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
 		print "%s: inferring root sequence" % basename(sys.argv[0])
 		system('bash %s/format/phy_to_ancphy.sh < %s > %s' % (src_dir, aln_fn, ancphy))
 		system('bash %s/format/tre_to_anctre.sh < %s > %s' % (src_dir, tre_fn, anctre))
-		system('bash %s/simulate/infer_root.sh %s %s > %s' % (src_dir, ancphy, anctre, rtSeq_fn))
+
+		print "\n\n%s: ==DANGER: what seems to be a horrible overflow in ANCESCON requires short filepaths==" % basename(sys.argv[0])
+		print "%s: creating symlinks in your home directory to attempt to circumvent this" % basename(sys.argv[0])
+		ln1_stat = system('ln -s %s ~/TMPLNK-%s' % (ancphy, basename(ancphy)))
+		ln2_stat = system('ln -s %s ~/TMPLNK-%s' % (anctre, basename(anctre)))
+
+		system('bash %s/simulate/infer_root.sh %s %s > %s' % (src_dir, '~/TMPLNK-'+basename(ancphy), '~/TMPLNK-'+basename(anctre), rtSeq_fn))
+		
+		if ln1_stat == 0 and ln2_stat == 0:
+			print "\n%s: ==DANGER: deleting symlinks" % basename(sys.argv[0])
+			system('rm ~/TMPLNK-%s' % basename(ancphy))
+			system('rm ~/TMPLNK-%s' % basename(anctre))
 
 	return rtSeq_fn
 
