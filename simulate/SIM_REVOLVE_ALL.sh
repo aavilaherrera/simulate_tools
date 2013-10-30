@@ -12,7 +12,7 @@ if [ "$#" != 4 ]; then
 fi
 
 if [ -z "${__REVOLVER}" ]; then
-	echo "export __REVOLVER=\"/path/to/revolver_executable\""
+	echo "export __REVOLVER=\"your revolver alias\""
 	exit 2
 fi
 

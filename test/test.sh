@@ -5,8 +5,9 @@
 # pass extra options like '--skip_hmmer' or '--help' when calling
  
 
+# alias revolver=java -cp /path/to/revolver/ revolver
+export __REVOLVER="revolver"
 export __SRC_PATH="/home/aram/dev-src/simulate_tools"
-export __REVOLVER="/home/aram/bin/revolver"
 
 TESTDIR="${__SRC_PATH}/test"
 
