@@ -29,7 +29,7 @@ REVDIR="$(dirname ${RXML})"
 
 for REP in {1..${NSIMS}}; do
 	${REVOLVER} ${RXML}
-	if [ "${GAPS}" == F ]; then
+	if [ "${GAPS}" == "F" ]; then
 		mv ${REVDIR}/out.fa ${REVDIR}/sim${REP}.fa
 	else
 		python ${__SRC_PATH}/simulate/apply_gaps.py phy2fa < ${REVDIR}/out.fa\
