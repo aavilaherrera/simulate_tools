@@ -18,13 +18,19 @@ Aram Avila-Herrera (Aram.Avila-Herrera at ucsf dot edu)
 3. ANCESCON: <ftp://iole.swmed.edu/pub/ANCESCON/>. Heads up, these are 32-bit binaries
 4. numpy: <http://www.numpy.org/>
 
+**revolver alias**
+Alias revolver to make it easy to call from the commandline.
+```bash
+alias my_revolver_alias="java -cp /path/to/revolver/ revolver"
+```
+
 **simulate_tools**
 Just let simulate_tools scripts know where they're located.
 ```bash
 #!/bin/bash
 # an example helper script...
 export __SRC_PATH="/path/to/simulate_tools"
-export __REVOLVER="/path/to/revolver_wrapper"
+export __REVOLVER="my_revolver_alias"
 
 python ${__SRC_PATH}/src/simulate_alignment.py ${@}
 
