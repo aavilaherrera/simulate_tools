@@ -22,6 +22,14 @@ if [ -z "${__SRC_PATH}" ]; then
 fi
 
 RXML="${1}"
+
+if [ ! -f "$RXML" ]; then
+	echo "revolver xml not found" >> /dev/stderr
+	echo "i am in $(pwd)" >> /dev/stderr
+	echo "    looking for ${RXML}" >> /dev/stderr
+	exit 4
+fi
+
 OGALN="${2}"
 NSIMS="${3}"
 GAPS="${4}"
