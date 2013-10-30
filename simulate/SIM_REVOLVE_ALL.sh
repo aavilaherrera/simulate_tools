@@ -8,7 +8,7 @@ usage(){
 }
 
 if [ "$#" != 3 ]; then
-	usage()
+	usage
 fi
 
 if [ -z "${REVOLVER}" ]; then
