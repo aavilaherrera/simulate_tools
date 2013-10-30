@@ -183,12 +183,12 @@ def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db):
 			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, revdir, revdir+'/'+job_name+'.xml'))
 	return revdir
 
-def run_revolver(job_name, outdir, num_sims):
-	revdir = outdir+'/revovler-%s'%(job_name)
+def run_revolver(job_name, outdir, aln_fn, num_sims):
+	revdir = outdir+'/revolver-%s'%(job_name)
 	revxml = revdir+'/%s.xml' % job_name
 	
 	print "%s: revolving now..." % basename(sys.argv[0]) 
-	exit_status = system('bash %s/simulate/SIM_REVOLVE_ALL.sh %s %d AddBackOrigGaps' % (src_dir, revxml, num_sims))
+	exit_status = system('bash %s/simulate/SIM_REVOLVE_ALL.sh %s %s %d AddBackOrigGaps' % (src_dir, revxml, aln_fn, num_sims))
 	if exit_status == 0:
 		print "%s: results in %s" % (basename(sys.argv[0]), revdir)
 	
@@ -218,7 +218,7 @@ def main(options):
 									options['tree'], options['hmmer_db'])
 	
 	# revolver
-	run_revolver(options['job_name'], options['outdir'], options['num_sims'])
+	run_revolver(options['job_name'], options['outdir'], options['aln_fn'], options['num_sims'])
 
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
