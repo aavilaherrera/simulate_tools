@@ -35,10 +35,10 @@ def get_cmd_options(args):
 			) % sys.argv[0]
 	
 	try:
-		optlist, args = getopt.getopt(args, 'ht:d:o:',
+		optlist, args = getopt.getopt(args, 'ht:d:o:n:',
 							['help', 'tree=', 'hmmer_db=',
 							'skip_anc', 'skip_hmmer', 'skip_revxml',
-							'outdir='])
+							'outdir=', 'num_sims='])
 	except getopt.GetoptError as err:
 		print >>sys.stderr, 'Error: %s' % err
 		sys.exit(usage)
@@ -51,6 +51,7 @@ def get_cmd_options(args):
 	options['skip_revxml']= False
 	options['outdir'] = '.'
 	options['hmmer_db'] = ''
+	options['num_sims'] = 1000
 
 
 	# read command line options
@@ -69,6 +70,8 @@ def get_cmd_options(args):
 			options['skip_hmmer'] = True
 		if opt in ('--skip_revxml'):
 			options['skip_revxml'] = True
+		if opt in ('-n', '--num_sims'):
+			options['num_sims'] = int(val)
 
 	if len(args) != 2:
 		print >>sys.stderr, 'Error: wrong number of args'
@@ -80,7 +83,7 @@ def get_cmd_options(args):
 	options['aln_fn'] = args[1]
 
 	print 'running with options:'
-	[ sys.stdout.write('\t%s: %s\n'%(opt, val))
+	[ sys.stdout.write('\t%s: %s\n'%(opt, str(val)))
 				for opt, val in sorted(options.iteritems()) ]
 		
 	return options
@@ -205,7 +208,6 @@ def main(options):
 									options['tree'], options['hmmer_db'])
 	
 	# now execute parallel simulations
-
 
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
