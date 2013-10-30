@@ -52,25 +52,33 @@ def parse_options(args, jobname):
 				"ncats" : "9",
 				"scale_factor" : "1.0",
 
-				"workdir" : "."#,
+				#"workdir" : "."#,
 				#"treefile" : jobname+'.tre',
 				#"hmmfile" : jobname+'.hmm',
 				#"rtseqfile" : jobname+'.root',
 				#"rtanofile" : jobname+'.scan'
 	}
-	options['rtseqfile'] = '%s/tmp-%s/rtSqNoGap.fa' % (options['workdir'], jobname)
-	options['rtanofile'] = '%s/tmp-%s/rootSeq.scan' % (options['workdir'], jobname)
-	options['hmmfile'] = '%s/%s.hmm' % (options['workdir'], jobname)
-	options['outdir'] = '%s/revolver-%s' % (options['workdir'], jobname)
-	options['hmmfetch'] = popen('which hmmfetch').read().strip()
-	options['treefile'] = ''
 
 	arg_opts = dict([ arg.split('=')[:2] for arg in args if '=' in arg])
-	for opt_k in options.iterkeys():
-		if opt_k in arg_opts:
-			options[opt_k] = str(arg_opts[opt_k])
+	for opt_k in arg_opts:
+		options[opt_k] = str(arg_opts[opt_k])
 
-	if options['treefile'] == '':
+	if 'workdir' not in options:
+		sys.exit('Error: workdir not specified')
+	
+	if 'rtseqfile' not in options:
+		options['rtseqfile'] = '%s/tmp-%s/rtSqNoGap.fa' % (options['workdir'], jobname)
+	if 'rtanofile' not in options:
+		options['rtanofile'] = '%s/tmp-%s/rootSeq.scan' % (options['workdir'], jobname)
+	if 'hmmfile' not in options:
+		options['hmmfile'] = '%s/%s.hmm' % (options['workdir'], jobname)
+	if 'outdir' not in options:
+		options['outdir'] = '%s/revolver-%s' % (options['workdir'], jobname)
+	
+	if 'hmmfetch' not in options:
+		options['hmmfetch'] = popen('which hmmfetch').read().strip()
+	
+	if 'treefile' not in options:
 		sys.exit('Error: treefile not specified')
 	if options['hmmfetch'] == '':
 		sys.exit('Error: hmmfetch not installed')
@@ -88,6 +96,7 @@ if __name__ == "__main__":
 	rtseqfile=str
 	rtanofile=str
 	hmmfile=str
+	workdir=str
 ''' % sys.argv[0])
 	
 
