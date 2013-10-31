@@ -3,8 +3,9 @@
 These scripts are mainly wrappers for various tools used to run a sequence evolution simulator.
 
 `simulate_alignment.py` generates simulated protein alignments of a **fixed length** along a **given phylogeny**,
-while **maintaining domain constraints** imposed by a given profile HMM. The inferred **root sequence**
-of a given protein sequence alignment is evolved with [Revolver](http://www.cibiv.at/software/revolver/)
+while **maintaining domain constraints** imposed by a given profile HMM. The intention is to simulate a sequence
+alignment that *looks like* a **given observed alignment**. The inferred **root sequence**
+of the given protein sequence alignment is evolved with [Revolver](http://www.cibiv.at/software/revolver/)
 
 ### Authors
 
@@ -14,7 +15,7 @@ Aram Avila-Herrera (Aram.Avila-Herrera at ucsf dot edu)
 **Dependencies**
 
 1. Revolver: <http://www.cibiv.at/software/revolver/>.
-2. HMMER3: <http://hmmer.janelia.org/>.
+2. HMMER3: <http://hmmer.janelia.org/>. (just make sure `hmmfetch` is in your path)
 3. ANCESCON: <ftp://iole.swmed.edu/pub/ANCESCON/>. Heads up, these are 32-bit binaries
 4. numpy: <http://www.numpy.org/>
 
@@ -25,25 +26,26 @@ alias my_revolver_alias="java -cp /path/to/revolver/ revolver"
 ```
 
 **simulate_tools**.
-Just let simulate_tools scripts know where they're located.
+Just let simulate_tools scripts know where they're located by editing
+the `__SRC_PATH` and `__REVOLVER` variables in the `runSimAli.sh` helper script.
 ```bash
-#!/bin/bash
-# an example helper script...
 export __SRC_PATH="/path/to/simulate_tools"
 export __REVOLVER="my_revolver_alias"
 
 python ${__SRC_PATH}/src/simulate_alignment.py ${@}
-
 ```
 
 ## Files
 - src/simulate_alignment.py -- master python script that ties everything together
 - format/* -- scripts used to go between the various miscellaneous sequence formats
 - simulate/* -- scripts that help run Revolver
+- test/* -- a test directory
 
 ## Notes
 - This is currently a huge mess, but surprisingly works
 - ANCESCON has a weird bug that doesn't like long path names.
+- REVOLVER doesn't handle more than 1052 sequences
+- ANCESCON is unusable with more than 250 sequences (but there is an alternate way to sample a root seq)
 - Don't run multiple instances with the same job name at the same time...
 - Don't edit to run Revolver in parallel, it will overwrite your output file or block.
 
