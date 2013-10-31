@@ -26,7 +26,7 @@ alias my_revolver_alias="java -cp /path/to/revolver/ revolver"
 ```
 
 **simulate_tools**.
-Just let simulate_tools scripts know where they're located by editing
+Just let `simulate_tools` scripts know where they're located by editing
 the `__SRC_PATH` and `__REVOLVER` variables in the `runSimAli.sh` helper script.
 ```bash
 export __SRC_PATH="/path/to/simulate_tools"
