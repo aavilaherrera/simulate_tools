@@ -37,18 +37,18 @@ python ${__SRC_PATH}/src/simulate_alignment.py ${@}
 
 ## Files
 - src/simulate_alignment.py -- master python script that ties everything together
-- format/* -- scripts used to go between the various miscellaneous sequence formats
-- simulate/* -- scripts that help run Revolver
-- test/* -- a test directory
+- format/ -- scripts used to go between the various miscellaneous sequence formats
+- simulate/ -- scripts that help run Revolver
+- test/ -- a test directory with an example script `test.sh`
 
 ## Notes
 - This is currently a huge mess, but surprisingly works
 - ANCESCON has a weird bug that doesn't like long path names.
-- REVOLVER doesn't handle more than 1052 sequences
+	- a workaround involving symlinking requires absolute paths be used
+- REVOLVER doesn't seem to handle more than 1052 sequences
 - ANCESCON is unusable with more than 250 sequences (but there is an alternate way to sample a root seq)
 - Don't run multiple instances with the same job name at the same time...
-- Don't edit to run Revolver in parallel, it will overwrite your output file or block.
+- Be very careful about editing `simulate_alignment.py` to run Revolver in parallel, it will overwrite Revolver's `out.fa` or block.
 
 ## To do
 1. add option to generate a "null" simulation (just permute columns). 
-2. add revolver wrapper to repository
