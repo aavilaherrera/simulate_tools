@@ -14,7 +14,7 @@ __email__ = 'Aram.Avila-Herrera@ucsf.edu'
 import sys
 import getopt
 from os.path import exists, basename
-from os import getenv, mkdir, makedirs, system
+from os import getenv, mkdir, makedirs, system, getcwd
 
 src_dir = getenv('__SRC_PATH')
 
@@ -49,7 +49,7 @@ def get_cmd_options(args):
 	options['skip_anc'] = False
 	options['skip_hmmer'] = False
 	options['skip_revxml']= False
-	options['outdir'] = '.'
+	options['outdir'] = getcwd()
 	options['hmmer_db'] = ''
 	options['num_sims'] = 1000
 
