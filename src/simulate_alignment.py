@@ -51,7 +51,7 @@ def get_cmd_options(args):
 	options['skip_revxml']= False
 	options['outdir'] = getcwd()
 	options['hmmer_db'] = ''
-	options['num_sims'] = 1000
+	options['num_sims'] = 10
 
 
 	# read command line options
@@ -115,7 +115,8 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
 	#numSeqs = 1000
 
 	if numSeqs > 1052:
-		sys.exit("Error: alignment \'%s\' too big for Revolver" % aln_fn)
+		#sys.exit("Error: alignment \'%s\' too big for Revolver" % aln_fn)
+		print "Error: alignment \'%s\' too big for Revolver" % aln_fn
 	if numSeqs > 250:
 		print 'Warning: alignment too big for ancescon'
 		print '\tsampling from 1st order markov chain'
