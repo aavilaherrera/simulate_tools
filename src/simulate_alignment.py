@@ -116,7 +116,8 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
 
 	if numSeqs > 1052:
 		#sys.exit("Error: alignment \'%s\' too big for Revolver" % aln_fn)
-		print "Error: alignment \'%s\' too big for Revolver" % aln_fn
+		print "Warning: alignment \'%s\' too big for Revolver." % aln_fn
+		print "Warning: Make sure N in java -XssNm is >= 16."
 	if numSeqs > 250:
 		print 'Warning: alignment too big for ancescon'
 		print '\tsampling from 1st order markov chain'
