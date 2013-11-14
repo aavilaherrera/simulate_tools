@@ -6,6 +6,6 @@
 # 
 # alias revolver=java -cp /path/to/revolver/ revolver
 export __REVOLVER="revolver"
-export __SRC_PATH="/home/aram/dev-src/simulate_tools"
+export __SRC_PATH="${HOME}/dev-src/simulate_tools"
 
 python ${__SRC_PATH}/src/simulate_alignment.py ${@}
