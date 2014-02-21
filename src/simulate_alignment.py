@@ -31,13 +31,15 @@ def get_cmd_options(args):
 				'				[ --skip_anc ]\n'+\
 				'				[ --skip_hmmer ]\n'+\
 				'				[ --skip_revxml ]\n'+\
+				'               [ --skip_revolver ]\n'+\
+				'               [ --num_sims N]\n'+\
 				'				[ --outdir outdir ] job_name input_aln.phy'
 			) % sys.argv[0]
 	
 	try:
 		optlist, args = getopt.getopt(args, 'ht:d:o:n:',
 							['help', 'tree=', 'hmmer_db=',
-							'skip_anc', 'skip_hmmer', 'skip_revxml',
+							'skip_anc', 'skip_hmmer', 'skip_revxml', 'skip_revolver',
 							'outdir=', 'num_sims='])
 	except getopt.GetoptError as err:
 		print >>sys.stderr, 'Error: %s' % err
@@ -49,6 +51,7 @@ def get_cmd_options(args):
 	options['skip_anc'] = False
 	options['skip_hmmer'] = False
 	options['skip_revxml']= False
+	options['skip_revolver'] = False
 	options['outdir'] = getcwd()
 	options['hmmer_db'] = ''
 	options['num_sims'] = 10
@@ -70,6 +73,8 @@ def get_cmd_options(args):
 			options['skip_hmmer'] = True
 		if opt in ('--skip_revxml'):
 			options['skip_revxml'] = True
+		if opt in ('--skip_revolver'):
+			options['skip_revolver'] = True
 		if opt in ('-n', '--num_sims'):
 			options['num_sims'] = int(val)
 
@@ -231,7 +236,8 @@ def main(options):
 									options['tree'], options['hmmer_db'])
 	
 	# revolver
-	run_revolver(options['job_name'], options['outdir'], options['aln_fn'], options['num_sims'])
+	if not options['skip_revolver']:
+		run_revolver(options['job_name'], options['outdir'], options['aln_fn'], options['num_sims'])
 
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
