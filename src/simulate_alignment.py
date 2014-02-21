@@ -34,6 +34,7 @@ def get_cmd_options(args):
 				'               [ --skip_revolver ]\n'+\
 				'               [ --num_sims N ]\n'+\
 				'               [ --ncats N ]\n'+\
+				'               [ --nogapmask ]\n'+\
 				'				[ --outdir outdir ] job_name input_aln.phy'
 			) % sys.argv[0]
 	
@@ -41,7 +42,7 @@ def get_cmd_options(args):
 		optlist, args = getopt.getopt(args, 'ht:d:o:n:',
 							['help', 'tree=', 'hmmer_db=',
 							'skip_anc', 'skip_hmmer', 'skip_revxml', 'skip_revolver',
-							'outdir=', 'ncats=', 'num_sims='])
+							'outdir=', 'ncats=', 'nogapmask', 'num_sims='])
 	except getopt.GetoptError as err:
 		print >>sys.stderr, 'Error: %s' % err
 		sys.exit(usage)
@@ -56,6 +57,7 @@ def get_cmd_options(args):
 	options['outdir'] = getcwd()
 	options['hmmer_db'] = ''
 	options['ncats'] = 9
+	options['gapmask'] = True
 	options['num_sims'] = 10
 
 
@@ -79,6 +81,8 @@ def get_cmd_options(args):
 			options['skip_revolver'] = True
 		if opt in ('--ncats'):
 			options['ncats'] = int(val)
+		if opt in ('--nogapmask'):
+			options['gapmask'] = False
 		if opt in ('-n', '--num_sims'):
 			options['num_sims'] = int(val)
 
@@ -206,12 +210,17 @@ def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db, ncats):
 			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, ncats, outdir, revdir+'/'+job_name+'.xml'))
 	return revdir
 
-def run_revolver(job_name, outdir, aln_fn, num_sims):
+def run_revolver(job_name, outdir, aln_fn, num_sims, use_gap_mask):
 	revdir = outdir+'/revolver-%s'%(job_name)
 	revxml = revdir+'/%s.xml' % job_name
 	
+	if use_gap_mask:
+		gap_action = "AddBackOrigGaps"
+	else:
+		gap_action = "F"
+
 	print "%s: revolving now..." % basename(sys.argv[0]) 
-	exit_status = system('bash %s/simulate/SIM_REVOLVE_ALL.sh %s %s %d AddBackOrigGaps' % (src_dir, revxml, aln_fn, num_sims))
+	exit_status = system('bash %s/simulate/SIM_REVOLVE_ALL.sh %s %s %d %s' % (src_dir, revxml, aln_fn, num_sims, gap_action))
 	if exit_status == 0:
 		print "%s: results in %s" % (basename(sys.argv[0]), revdir)
 	
@@ -242,7 +251,8 @@ def main(options):
 	
 	# revolver
 	if not options['skip_revolver']:
-		run_revolver(options['job_name'], options['outdir'], options['aln_fn'], options['num_sims'])
+		run_revolver(options['job_name'], options['outdir'], options['aln_fn'],
+						options['num_sims'], options['gapmask'])
 
 if __name__ == '__main__':
 	options = get_cmd_options(sys.argv[1:])
