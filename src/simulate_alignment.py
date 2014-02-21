@@ -32,7 +32,8 @@ def get_cmd_options(args):
 				'				[ --skip_hmmer ]\n'+\
 				'				[ --skip_revxml ]\n'+\
 				'               [ --skip_revolver ]\n'+\
-				'               [ --num_sims N]\n'+\
+				'               [ --num_sims N ]\n'+\
+				'               [ --ncats N ]\n'+\
 				'				[ --outdir outdir ] job_name input_aln.phy'
 			) % sys.argv[0]
 	
@@ -40,7 +41,7 @@ def get_cmd_options(args):
 		optlist, args = getopt.getopt(args, 'ht:d:o:n:',
 							['help', 'tree=', 'hmmer_db=',
 							'skip_anc', 'skip_hmmer', 'skip_revxml', 'skip_revolver',
-							'outdir=', 'num_sims='])
+							'outdir=', 'ncats=', 'num_sims='])
 	except getopt.GetoptError as err:
 		print >>sys.stderr, 'Error: %s' % err
 		sys.exit(usage)
@@ -54,6 +55,7 @@ def get_cmd_options(args):
 	options['skip_revolver'] = False
 	options['outdir'] = getcwd()
 	options['hmmer_db'] = ''
+	options['ncats'] = 9
 	options['num_sims'] = 10
 
 
@@ -75,8 +77,11 @@ def get_cmd_options(args):
 			options['skip_revxml'] = True
 		if opt in ('--skip_revolver'):
 			options['skip_revolver'] = True
+		if opt in ('--ncats'):
+			options['ncats'] = int(val)
 		if opt in ('-n', '--num_sims'):
 			options['num_sims'] = int(val)
+
 
 	if len(args) != 2:
 		print >>sys.stderr, 'Error: wrong number of args'
@@ -178,7 +183,7 @@ def annotate_root(job_name, outdir, tmpdir, aln_fn, hmmer_db):
 
 	return rtSqNG_fn
 
-def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db):
+def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db, ncats):
 	''' generates revolver xml in outdir/rev-job_name/job_name.xml
 
 	'''
@@ -197,8 +202,8 @@ def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db):
 
 	print "%s: making revolver xml input file" % basename(sys.argv[0])
 	system(('python %s/simulate/mk_revolver_xml.py %s treefile=%s ' +
-			'rtseqfile=%s rtanofile=%s hmmfile=%s workdir=%s > %s') %
-			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, outdir, revdir+'/'+job_name+'.xml'))
+			'rtseqfile=%s rtanofile=%s hmmfile=%s ncats=%d workdir=%s > %s') %
+			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, ncats, outdir, revdir+'/'+job_name+'.xml'))
 	return revdir
 
 def run_revolver(job_name, outdir, aln_fn, num_sims):
@@ -233,7 +238,7 @@ def main(options):
 	# revxml
 	if not options['skip_revxml']:
 		generate_revolver_xml(options['job_name'], options['outdir'], tmpdir,
-									options['tree'], options['hmmer_db'])
+							options['tree'], options['hmmer_db'], options['ncats'])
 	
 	# revolver
 	if not options['skip_revolver']:
