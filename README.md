@@ -7,6 +7,8 @@ while **maintaining domain constraints** imposed by a given profile HMM. The int
 alignment that *looks like* a **given observed alignment**. The inferred **root sequence**
 of the given protein sequence alignment is evolved with [Revolver](http://www.cibiv.at/software/revolver/)
 
+Currently, the gapping pattern of the current alignment is overlayed onto the generated alignments.
+
 ### Authors
 
 Aram Avila-Herrera (Aram.Avila-Herrera at ucsf dot edu)
@@ -16,6 +18,7 @@ Aram Avila-Herrera (Aram.Avila-Herrera at ucsf dot edu)
 
 1. Revolver: <http://www.cibiv.at/software/revolver/>
 2. HMMER3: <http://hmmer.janelia.org/> (Make sure `hmmfetch` is in your path)
+	- **NOTE:** Required version: [Easel h3.0rc2 (March 2010)](http://hmmer.janelia.org/software/archive)
 3. ANCESCON: <ftp://iole.swmed.edu/pub/ANCESCON/> Heads up, these are 32-bit binaries
 4. numpy: <http://www.numpy.org/>
 
@@ -54,4 +57,5 @@ set `N` greater than or equal to 16m (eg. `-Xss16m`).
 - Be very careful about editing `simulate_alignment.py` to run Revolver in parallel, it will overwrite Revolver's `out.fa` or block.
 
 ## To do
-1. add option to generate a "null" simulation (just permute columns). 
+- Package nicely
+- Find replacement or source for ANCESCON
