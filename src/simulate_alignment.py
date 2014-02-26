@@ -35,6 +35,7 @@ def get_cmd_options(args):
 				'               [ --num_sims N ]\n'+\
 				'               [ --ncats N ]\n'+\
 				'               [ --nogapmask ]\n'+\
+				'               [ --alpha ]\n'+\
 				'				[ --outdir outdir ] job_name input_aln.phy'
 			) % sys.argv[0]
 	
@@ -42,7 +43,7 @@ def get_cmd_options(args):
 		optlist, args = getopt.getopt(args, 'ht:d:o:n:',
 							['help', 'tree=', 'hmmer_db=',
 							'skip_anc', 'skip_hmmer', 'skip_revxml', 'skip_revolver',
-							'outdir=', 'ncats=', 'nogapmask', 'num_sims='])
+							'outdir=', 'ncats=', 'alpha=', 'nogapmask', 'num_sims='])
 	except getopt.GetoptError as err:
 		print >>sys.stderr, 'Error: %s' % err
 		sys.exit(usage)
@@ -57,6 +58,7 @@ def get_cmd_options(args):
 	options['outdir'] = getcwd()
 	options['hmmer_db'] = ''
 	options['ncats'] = 9
+	options['alpha'] = 1
 	options['gapmask'] = True
 	options['num_sims'] = 10
 
@@ -81,6 +83,8 @@ def get_cmd_options(args):
 			options['skip_revolver'] = True
 		if opt in ('--ncats'):
 			options['ncats'] = int(val)
+		if opt in ('--alpha'):
+			options['alpha'] = float(val)
 		if opt in ('--nogapmask'):
 			options['gapmask'] = False
 		if opt in ('-n', '--num_sims'):
@@ -187,7 +191,7 @@ def annotate_root(job_name, outdir, tmpdir, aln_fn, hmmer_db):
 
 	return rtSqNG_fn
 
-def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db, ncats):
+def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db, ncats, alpha):
 	''' generates revolver xml in outdir/rev-job_name/job_name.xml
 
 	'''
@@ -206,8 +210,8 @@ def generate_revolver_xml(job_name, outdir, tmpdir, tre_fn, hmmer_db, ncats):
 
 	print "%s: making revolver xml input file" % basename(sys.argv[0])
 	system(('python %s/simulate/mk_revolver_xml.py %s treefile=%s ' +
-			'rtseqfile=%s rtanofile=%s hmmfile=%s ncats=%d workdir=%s > %s') %
-			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, ncats, outdir, revdir+'/'+job_name+'.xml'))
+			'rtseqfile=%s rtanofile=%s hmmfile=%s ncats=%d alpha=%f workdir=%s > %s') %
+			(src_dir, job_name, tre_fn, rtSqNG_fn, rtAno_fn, hmmer_db, ncats, alpha, outdir, revdir+'/'+job_name+'.xml'))
 	return revdir
 
 def run_revolver(job_name, outdir, aln_fn, num_sims, use_gap_mask):
@@ -247,7 +251,7 @@ def main(options):
 	# revxml
 	if not options['skip_revxml']:
 		generate_revolver_xml(options['job_name'], options['outdir'], tmpdir,
-							options['tree'], options['hmmer_db'], options['ncats'])
+						options['tree'], options['hmmer_db'], options['ncats'], options['alpha'])
 	
 	# revolver
 	if not options['skip_revolver']:
