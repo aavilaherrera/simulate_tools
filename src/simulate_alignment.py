@@ -29,6 +29,7 @@ def get_cmd_options(args):
 				'usage: %s [-h | [ --tree tree_file ] \n'+\
 				'				[ --hmmer_db pfam.hmm ]\n'+\
 				'				[ --skip_anc ]\n'+\
+				'               [ --m1 ]\n'+\
 				'				[ --skip_hmmer ]\n'+\
 				'				[ --skip_revxml ]\n'+\
 				'               [ --skip_revolver ]\n'+\
@@ -42,7 +43,7 @@ def get_cmd_options(args):
 	try:
 		optlist, args = getopt.getopt(args, 'ht:d:o:n:',
 							['help', 'tree=', 'hmmer_db=',
-							'skip_anc', 'skip_hmmer', 'skip_revxml', 'skip_revolver',
+							'skip_anc', 'm1', 'skip_hmmer', 'skip_revxml', 'skip_revolver',
 							'outdir=', 'ncats=', 'alpha=', 'nogapmask', 'num_sims='])
 	except getopt.GetoptError as err:
 		print >>sys.stderr, 'Error: %s' % err
@@ -61,6 +62,7 @@ def get_cmd_options(args):
 	options['alpha'] = 1
 	options['gapmask'] = True
 	options['num_sims'] = 10
+	options['m1'] = False
 
 
 	# read command line options
@@ -75,6 +77,8 @@ def get_cmd_options(args):
 			options['tree'] = val
 		if opt in ('--skip_anc'):
 			options['skip_anc'] = True
+		if opt in ('--m1'):
+			options['m1'] = True
 		if opt in ('--skip_hmmer'):
 			options['skip_hmmer'] = True
 		if opt in ('--skip_revxml'):
@@ -117,7 +121,7 @@ def PhyCheckNumSeqs(phy_fn):
 	numSeqs = phy_fh.readlines()[0].strip().split()[0] # get num seqs from header
 	return int(numSeqs)
 
-def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
+def infer_the_root(job_name, tmpdir, aln_fn, tre_fn, use_m1):
 	''' infer root sequence and write as fasta to tmpdir/rootSeq.fa
 
 		check number of sequences in aln_fn and run ANCESCON
@@ -139,6 +143,9 @@ def infer_the_root(job_name, tmpdir, aln_fn, tre_fn):
 	if numSeqs > 250:
 		print 'Warning: alignment too big for ancescon'
 		print '\tsampling from 1st order markov chain'
+		use_m1 = True
+
+	if use_m1:
 		system('python %s/simulate/m1_sample.py %s > %s' % (src_dir, aln_fn, rtSeq_fn))
 	else:
 		# first format phy for ANCESCON
@@ -241,7 +248,7 @@ def main(options):
 	
 	# infer root
 	if not options['skip_anc']:
-		infer_the_root(options['job_name'], tmpdir, options['aln_fn'], options['tree'])
+		infer_the_root(options['job_name'], tmpdir, options['aln_fn'], options['tree'], options['m1'])
 
 	# hmmer
 	if not options['skip_hmmer']:
