@@ -4,8 +4,8 @@ These scripts are mainly wrappers for various tools used to run a sequence evolu
 
 `simulate_alignment.py` generates simulated protein alignments of a **fixed length** along a **given phylogeny**,
 while **maintaining domain constraints** imposed by a given profile HMM. The intention is to simulate a sequence
-alignment that *looks like* a **given observed alignment**. The inferred **root sequence**
-of the given protein sequence alignment is evolved with [Revolver](http://www.cibiv.at/software/revolver/)
+alignment that *looks like* a **given observed alignment**. A starting sequence (either inferred ancestral or 
+randomly generated using the given alignment) is evolved with [Revolver](http://www.cibiv.at/software/revolver/)
 
 Currently, the gapping pattern of the current alignment is overlayed onto the generated alignments.
 
@@ -18,7 +18,7 @@ Aram Avila-Herrera (Aram.Avila-Herrera at ucsf dot edu)
 
 1. Revolver: <http://www.cibiv.at/software/revolver/>
 2. HMMER3: <http://hmmer.janelia.org/> (Make sure `hmmfetch` is in your path)
-	- **NOTE:** Required version: [Easel h3.0rc2 (March 2010)](http://hmmer.janelia.org/software/archive)
+	- **NOTE:** Revolver requires version: [Easel h3.0rc2 (March 2010)](http://hmmer.janelia.org/software/archive)
 3. ANCESCON: <ftp://iole.swmed.edu/pub/ANCESCON/> Heads up, these are 32-bit binaries
 4. numpy: <http://www.numpy.org/>
 
@@ -51,11 +51,11 @@ python ${__SRC_PATH}/src/simulate_alignment.py ${@}
 - Increase the java stack size with `-XssN` for large alignments. For alignments with more than 1052 sequences
 set `N` greater than or equal to 16m (eg. `-Xss16m`).
 - ANCESCON has a weird bug that doesn't like long path names.
-	- a workaround involving symlinking requires absolute paths be used
-- ANCESCON is unusable with more than 250 sequences (but there is an alternate way to sample a root seq)
+	- A workaround involving symlinking requires absolute paths be used.
+- ANCESCON is unusable with more than 250 sequences. An alternate starting sequence is generated from the alignment.
 - Don't run multiple instances with the same job name at the same time...
 - Be very careful about editing `simulate_alignment.py` to run Revolver in parallel, it will overwrite Revolver's `out.fa` or block.
 
 ## To do
-- Package nicely
-- Find replacement or source for ANCESCON
+- [ ] Package nicely
+- [ ] Find replacement or source for ANCESCON
